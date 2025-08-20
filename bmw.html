@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>💖 joguinho pra vc minha princesa. Eu te amo gabriela 💖</title>
+  <style>
+    :root{
+      --bg:#fff0f6; --ink:#412432; --pink:#ff6fa9; --pink2:#ff9ac2; --rose:#ffe0ec; --violet:#8a4b6f; --ok:#37b24d; --warn:#f59f00;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit}
+
+    /* Layout */
+    .wrap{max-width:1000px;margin:0 auto;padding:18px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:3px dashed #ffd4e7;position:sticky;top:0;background:linear-gradient(180deg,#fff0f6 0%, #fff0f6cc 70%, #fff0f600 100%);backdrop-filter: blur(6px);z-index:5}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:radial-gradient(circle at 30% 30%, #fff 0 35%, #ffb3d5 36% 100%);box-shadow:0 6px 18px #ffb3d566}
+    .brand h1{font-size:clamp(18px,3vw,26px);margin:0}
+    .cta{display:flex;gap:10px;align-items:center}
+    .btn{appearance:none;border:0;border-radius:999px;padding:10px 16px;background:var(--pink);color:white;font-weight:700;cursor:pointer;box-shadow:0 10px 18px #ff6fa944, inset 0 -4px #ff4f96;transition:transform .15s ease}
+    .btn:hover{transform:translateY(-2px)}
+    .btn.alt{background:white;color:var(--pink);border:2px solid var(--pink)}
+
+    /* Panels */
+    .panel{background:#fff;border:2px solid #ffd4e7;border-radius:18px;padding:18px;box-shadow:0 12px 30px #ffb3d544}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+    /* Game stage */
+    .stage{position:relative;height:min(70vh,600px);min-height:420px;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#ffe9f3 0%, #fff 60%);
+           border:2px solid #ffd4e7}
+    .sky{position:absolute;inset:0;pointer-events:none;background:radial-gradient(600px 300px at 85% 15%, #fff 0 35%, transparent 60%), radial-gradient(500px 240px at 20% 30%, #fff 0 35%, transparent 60%)}
+    .ground{position:absolute;left:-10%;right:-10%;bottom:-30px;height:160px;background:repeating-linear-gradient(90deg,#ffd4e7 0 18px,#ffe5f1 18px 36px);transform:skewY(-3deg)}
+
+    /* Heart entity */
+    .heart{position:absolute;top:-60px;left:0;width:48px;height:44px;transform:translate(-50%,-50%) scale(0.9);cursor:pointer;filter:drop-shadow(0 10px 14px #ff77b644)}
+    .heart::before, .heart::after{content:"";position:absolute;width:50%;height:80%;background:var(--pink);border-radius:50% 50% 0 0}
+    .heart::before{left:0;transform:rotate(-45deg);transform-origin:100% 100%}
+    .heart::after{right:0;transform:rotate(45deg);transform-origin:0 100%}
+    .heart .spark{position:absolute;inset:0;pointer-events:none}
+    .spark i{position:absolute;width:6px;height:6px;background:#fff;border-radius:50%;opacity:.9;animation:spark .6s ease-out forwards}
+    @keyframes spark{to{transform:translateY(-22px) scale(0.4);opacity:0}}
+
+    /* Pop animation */
+    .pop{animation:pop .25s ease-out}
+    @keyframes pop{50%{transform:translate(-50%,-50%) scale(1.15)} 100%{transform:translate(-50%,-50%) scale(0.95)}}
+
+    /* HUD */
+    .hud{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .stats{display:flex;gap:12px;align-items:center}
+    .chip{display:flex;gap:8px;align-items:center;background:#fff;border:2px solid #ffd4e7;border-radius:999px;padding:8px 12px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.score{background:var(--ok)} .dot.time{background:var(--warn)} .dot.lives{background:var(--pink)}
+
+    .msg{font-weight:700;color:var(--violet)}
+
+    /* Floating compliments */
+    .float{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #ffd4e7;border-radius:12px;padding:8px 12px;color:var(--violet);opacity:0;animation:floatup 1.4s ease forwards}
+    @keyframes floatup{0%{opacity:0;transform:translate(-50%,-20px)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-80px)}}
+
+    /* Dialogs */
+    .overlay{position:fixed;inset:0;background:#00000040;display:none;place-items:center;z-index:10}
+    .overlay.open{display:grid}
+    .dialog{background:#fff;border:2px solid #ffd4e7;border-radius:18px;padding:20px;max-width:520px;width:min(92vw,520px);text-align:center;box-shadow:0 18px 40px #00000025}
+    .dialog h2{margin:0 0 10px}
+    .levels{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+    .pill{border:2px solid var(--pink);color:var(--pink);background:#fff;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .pill.active,.pill:hover{background:var(--pink);color:#fff}
+
+    /* Confetti */
+    .confetti i{position:absolute;width:8px;height:14px;background:var(--pink2);opacity:.9;border-radius:3px;animation:fall 1.8s ease forwards}
+    @keyframes fall{to{transform:translateY(140px) rotate(180deg);opacity:0}}
+
+    /* Footer */
+    footer{padding:18px;text-align:center;color:#925a78}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">💖</div>
+      <h1>EU TE AMO gabriela</h1>
+    </div>
+    <div class="cta">
+      <button id="btnStart" class="btn">Começar</button>
+      <button id="btnHow" class="btn alt">Como jogar</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="hud">
+      <div class="stats">
+        <div class="chip"><span class="dot score"></span><strong>Pontos:</strong>&nbsp;<span id="score">0</span></div>
+        <div class="chip"><span class="dot time"></span><strong>Tempo:</strong>&nbsp;<span id="time">60</span>s</div>
+        <div class="chip"><span class="dot lives"></span><strong>Vidas:</strong>&nbsp;<span id="lives">3</span></div>
+      </div>
+      <div class="msg" id="msg">Clique nos coraçõezinhos para pontuar! 😍</div>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <div id="stage" class="stage">
+          <div class="sky"></div>
+          <div class="ground"></div>
+        </div>
+      </section>
+      <aside class="panel">
+        <h2>Cartas de Amor</h2>
+        <p>Abra uma cartinha a cada marco de pontos. 💌</p>
+        <div id="cards"></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    Feito com carinho para você. © <span id="year"></span>
+  </footer>
+
+  <!-- Dialogs -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true">
+    <div class="dialog">
+      <h2 id="dlgTitle">Bem-vinda 💕</h2>
+      <p id="dlgText">Pegue o máximo de corações em 60 segundos. Evite deixar muitos caírem!<br>Escolha a dificuldade:</p>
+      <div class="levels">
+        <button class="pill" data-dif="easy">Fofo 🥰</button>
+        <button class="pill" data-dif="medium">Intenso 😘</button>
+        <button class="pill" data-dif="hard">Ufa! 😅</button>
+      </div>
+      <div style="margin-top:14px">
+        <button id="dlgOk" class="btn">Começar agora</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========= JavaScript =========
+    const stage = document.getElementById('stage');
+    const scoreEl = document.getElementById('score');
+    const timeEl = document.getElementById('time');
+    const livesEl = document.getElementById('lives');
+    const msgEl = document.getElementById('msg');
+    const cardsEl = document.getElementById('cards');
+    const overlay = document.getElementById('overlay');
+    const yearEl = document.getElementById('year');
+    yearEl.textContent = new Date().getFullYear();
+
+    const btnStart = document.getElementById('btnStart');
+    const btnHow = document.getElementById('btnHow');
+    const dlgOk = document.getElementById('dlgOk');
+
+    const compliments = [
+      'Você ilumina meu mundo ✨',
+      'Seu sorriso é meu lugar favorito 😊',
+      'Te amo hoje e sempre 💞',
+      'Meu coração é todo seu 💗',
+      'Você é meu melhor destino 🗺️',
+      'Com você, tudo é melhor 🌷',
+    ];
+
+    const letters = [
+      'Cada momento com você é um presente que eu nunca quero desembrulhar rápido demais. 💌',
+      'Seus abraços são o endereço do meu coração. 🏡💕',
+      'Te escolheria em todas as versões do universo. ♾️',
+      'Você é meu milagre diário. ✨',
+      'Obrigado por existir — eu te amo! ❤️',
+    ];
+
+    // Game state
+    let running = false; let timer = 60; let score = 0; let lives = 3; let spawnMs = 900; let speed = 90; let spawnHandle = 0; let tickHandle = 0; let dif = 'easy';
+
+    function reset(){
+      score = 0; lives = 3; timer = 60; scoreEl.textContent = '0'; livesEl.textContent = '3'; timeEl.textContent = '60'; msgEl.textContent = 'Clique nos coraçõezinhos para pontuar! 😍';
+      stage.querySelectorAll('.heart,.float,.confetti').forEach(n=>n.remove());
+      cardsEl.innerHTML = '';
+    }
+
+    function openDialog(mode){
+      overlay.classList.add('open');
+      document.getElementById('dlgTitle').textContent = mode==='how'? 'Como Jogar' : 'Bem-vinda 💕';
+      document.getElementById('dlgText').innerHTML = `Pegue o máximo de corações em <b>60s</b>. Clique/tocar dá pontos, deixar cair perde vidas.\n<br>Escolha a dificuldade:`;
+    }
+
+    function setDifficulty(level){
+      dif = level;
+      document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active', p.dataset.dif===level));
+      if(level==='easy'){ spawnMs = 900; speed = 90; }
+      if(level==='medium'){ spawnMs = 650; speed = 120; }
+      if(level==='hard'){ spawnMs = 480; speed = 150; }
+    }
+
+    function start(){
+      reset(); running = true; overlay.classList.remove('open');
+      tickHandle = setInterval(()=>{ timer--; timeEl.textContent = String(timer); if(timer<=0) return gameOver(true); },1000);
+      scheduleSpawn();
+    }
+
+    function scheduleSpawn(){
+      if(!running) return; spawnHeart();
+      spawnHandle = setTimeout(scheduleSpawn, spawnMs * (0.85 + Math.random()*0.3));
+    }
+
+    function spawnHeart(){
+      const w = stage.clientWidth; const x = 30 + Math.random()*(w-60);
+      const h = document.createElement('div'); h.className = 'heart'; h.style.left = x+'px'; h.style.top = '-60px';
+      const start = performance.now(); const spd = speed * (0.9 + Math.random()*0.3);
+      const spark = document.createElement('div'); spark.className='spark'; h.appendChild(spark);
+
+      function loop(t){
+        const y = (t-start)/1000 * spd; h.style.top = (y-60)+'px';
+        if(!running){ h.remove(); return; }
+        if(y < stage.clientHeight + 60){ requestAnimationFrame(loop); }
+        else { miss(h); }
+      }
+      h.addEventListener('pointerdown',()=>hit(h));
+      stage.appendChild(h);
+      requestAnimationFrame(loop);
+    }
+
+    function burst(node){
+      for(let i=0;i<6;i++){ const s=document.createElement('i'); s.style.left=(8+Math.random()*28)+'px'; s.style.top=(8+Math.random()*28)+'px'; s.style.transform=`translate(${(Math.random()*26-13)}px, ${(Math.random()*10-6)}px)`; node.querySelector('.spark').appendChild(s); setTimeout(()=>s.remove(),600); }
+    }
+
+    function floatText(text){
+      const f=document.createElement('div'); f.className='float'; f.textContent=text; stage.appendChild(f); setTimeout(()=>f.remove(),1400);
+    }
+
+    function confetti(x,y){
+      const box=document.createElement('div'); box.className='confetti'; box.style.position='absolute'; box.style.left=x+'px'; box.style.top=y+'px'; stage.appendChild(box);
+      for(let i=0;i<16;i++){ const c=document.createElement('i'); c.style.left=(Math.random()*80-40)+'px'; c.style.top=(Math.random()*10-10)+'px'; c.style.background = Math.random()>0.5? 'var(--pink2)' : '#ffd4e7'; c.style.transform = `translateY(0) rotate(${Math.random()*90}deg)`; c.style.animationDelay = (Math.random()*0.2)+'s'; box.appendChild(c); }
+      setTimeout(()=>box.remove(),1800);
+    }
+
+    function hit(h){
+      if(!running) return; score+=10; scoreEl.textContent = String(score); h.classList.add('pop'); burst(h);
+      if(Math.random()>0.5){ floatText(compliments[(Math.random()*compliments.length)|0]); }
+      setTimeout(()=>h.remove(),160);
+      // milestones
+      if(score>0 && score%50===0){ addLetter(); confetti(h.offsetLeft, h.offsetTop); msgEl.textContent = 'UAU! Nova cartinha de amor desbloqueada! 💌'; }
+    }
+
+    function miss(h){
+      if(!running) return; h.remove(); lives--; livesEl.textContent = String(lives); msgEl.textContent = 'Ops! Um coração caiu 💔';
+      if(lives<=0) gameOver(false);
+    }
+
+    function gameOver(timeOutWin){
+      running=false; clearInterval(tickHandle); clearTimeout(spawnHandle);
+      msgEl.textContent = timeOutWin? 'Tempo! Vamos ver sua pontuação 💫' : 'Acabaram as vidas!';
+      const best = Number(localStorage.getItem('love_best')||0);
+      if(score>best) localStorage.setItem('love_best', String(score));
+      document.getElementById('dlgTitle').textContent = 'Resultado ✨';
+      document.getElementById('dlgText').innerHTML = `Pontos: <b>${score}</b><br>Recorde: <b>${Math.max(best,score)}</b><br><br>Quer jogar de novo? Escolha a dificuldade:`;
+      overlay.classList.add('open');
+    }
+
+    function addLetter(){
+      const i = (cardsEl.children.length)%letters.length;
+      const card = document.createElement('details'); card.className='lovecard';
+      const summary = document.createElement('summary'); summary.textContent = `Cartinha #${cardsEl.children.length+1}`; summary.style.cursor='pointer';
+      const p = document.createElement('p'); p.textContent = letters[i]; p.style.marginTop='8px';
+      card.appendChild(summary); card.appendChild(p); cardsEl.prepend(card);
+    }
+
+    // Events
+    btnStart.addEventListener('click',()=>{ openDialog('start'); setDifficulty(dif); });
+    btnHow.addEventListener('click',()=>{ openDialog('how'); setDifficulty(dif); });
+    overlay.addEventListener('click', (e)=>{ if(e.target===overlay) overlay.classList.remove('open'); });
+    document.querySelectorAll('.pill').forEach(p=>p.addEventListener('click',()=> setDifficulty(p.dataset.dif)));
+    dlgOk.addEventListener('click', start);
+
+    // acessibilidade: teclas
+    window.addEventListener('keydown', (e)=>{ if(e.key===' '|| e.key==='Enter'){ if(!running && overlay.classList.contains('open')) start(); }});
+  </script>
+
+  <!-- ========= TypeScript (opcional, para desenvolvimento) =========
+  // Salve como src/game.ts e transpile para JS.
+  type Diff = 'easy'|'medium'|'hard';
+  interface GameState { running:boolean; timer:number; score:number; lives:number; spawnMs:number; speed:number; dif:Diff }
+  interface Heart { el:HTMLDivElement; vx:number; vy:number }
+
+  // Exemplificando tipagem básica
+  const state: GameState = { running:false, timer:60, score:0, lives:3, spawnMs:900, speed:90, dif:'easy' };
+  function setDiff(d:Diff){ state.dif=d; state.spawnMs = d==='easy'?900:d==='medium'?650:480; state.speed = d==='easy'?90:d==='medium'?120:150; }
+  // A lógica de spawn/movimento/colisão seria semelhante ao JS acima, mas tipada.
+  -->
+</body>
+</html>
